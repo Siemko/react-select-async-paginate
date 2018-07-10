@@ -15,17 +15,19 @@ class AsyncPaginate extends Component {
     // eslint-disable-next-line react/forbid-prop-types
     cacheUniq: PropTypes.any,
     selectRef: PropTypes.func,
+    initialOptions: PropTypes.arrayOf(PropTypes.object),
   };
 
   static defaultProps = {
     cacheUniq: null,
     selectRef: () => {},
+    initialOptions: [],
   };
 
   state = {
     search: '',
     optionsCache: {},
-  }
+  };
 
   componentDidUpdate({ cacheUniq }) {
     if (cacheUniq !== this.props.cacheUniq) {
@@ -39,13 +41,13 @@ class AsyncPaginate extends Component {
     this.setState({
       search: '',
     });
-  }
+  };
 
   onOpen = async () => {
     if (!this.state.optionsCache['']) {
       await this.loadOptions();
     }
-  }
+  };
 
   onInputChange = async (search) => {
     await this.setState({
@@ -55,26 +57,20 @@ class AsyncPaginate extends Component {
     if (!this.state.optionsCache[search]) {
       await this.loadOptions();
     }
-  }
+  };
 
   onMenuScrollToBottom = async () => {
-    const {
-      search,
-      optionsCache,
-    } = this.state;
+    const { search, optionsCache } = this.state;
 
     const currentOptions = optionsCache[search];
 
     if (currentOptions) {
       await this.loadOptions();
     }
-  }
+  };
 
   async loadOptions() {
-    const {
-      search,
-      optionsCache,
-    } = this.state;
+    const { search, optionsCache } = this.state;
 
     const currentOptions = optionsCache[search] || initialCache;
 
@@ -94,10 +90,7 @@ class AsyncPaginate extends Component {
     });
 
     try {
-      const {
-        options,
-        hasMore,
-      } = await this.props.loadOptions(search, currentOptions.options);
+      const { options, hasMore } = await this.props.loadOptions(search, currentOptions.options);
 
       await this.setState({
         optionsCache: {
@@ -124,14 +117,9 @@ class AsyncPaginate extends Component {
   }
 
   render() {
-    const {
-      selectRef,
-    } = this.props;
+    const { selectRef } = this.props;
 
-    const {
-      search,
-      optionsCache,
-    } = this.state;
+    const { search, optionsCache } = this.state;
 
     const currentOptions = optionsCache[search] || initialCache;
 
@@ -143,7 +131,7 @@ class AsyncPaginate extends Component {
         onInputChange={this.onInputChange}
         onMenuScrollToBottom={this.onMenuScrollToBottom}
         isLoading={currentOptions.isLoading}
-        options={currentOptions.options}
+        options={this.props.initialOptions.concat(currentOptions.options)}
         ref={selectRef}
       />
     );
